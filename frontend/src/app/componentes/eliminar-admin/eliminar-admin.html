@@ -1,0 +1,29 @@
+<div class="fondo" (click)="alCerrar()"></div>
+<dialog open>
+  <h2>Eliminar Administrador</h2>
+  
+  @if (errorMsg()) {
+    <p class="error">{{ errorMsg() }}</p>
+  }
+  @if (successMsg()) {
+    <p class="success">{{ successMsg() }}</p>
+  }
+
+  <ul class="admin-list">
+    @for (admin of administradores(); track admin.id) {
+      <li>
+        <span class="admin-name">{{ admin.username }}</span>
+        
+        @if (authService.currentAdmin() === admin.username) {
+            <span class="badge self">Tu Cuenta</span>
+        } @else {
+            <button class="btn-eliminar" (click)="eliminar(admin.id, $event)">Eliminar</button>
+        }
+      </li>
+    }
+  </ul>
+
+  <p class="acciones">
+    <button type="button" class="btn-cancelar" (click)="alCerrar()">Cerrar</button>
+  </p>
+</dialog>

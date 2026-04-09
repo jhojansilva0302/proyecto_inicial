@@ -1,0 +1,7 @@
+<app-tarjeta>
+  <button [class.active]="seleccionado" (click)="alSeleccionarUsuario()">
+    <img [src]="usuario.avatar" [alt]="usuario.nombre" />
+    <span>{{ usuario.nombre }}</span>
+  </button>
+
+</app-tarjeta>

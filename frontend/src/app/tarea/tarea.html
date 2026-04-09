@@ -1,0 +1,22 @@
+<app-tarjeta>
+  <article [style.backgroundColor]="tarea.completada === 1 ? '#e8f5e9' : 'transparent'" style="border-radius: 8px; padding: 10px;">
+    <h2>{{ tarea.titulo }}</h2>
+    <time>{{ tarea.expira | date: 'fullDate' }}</time>
+    <p>{{ tarea.resumen }}</p>
+    
+    @if (authService.isLoggedIn()) {
+      <p class="acciones">
+        @if (tarea.completada !== 1) {
+          <button (click)="alCompletarTarea()" style="cursor: pointer;">Terminada</button>
+        } @else {
+          <span style="color: #2e7d32; font-weight: bold; margin-right: 15px;">¡Hecha! ✅</span>
+        }
+        <button (click)="alEliminarTarea()" style="cursor: pointer; margin-left: 10px; background-color: #ff4d4d; color: white;">Eliminar</button>
+      </p>
+    } @else {
+      @if (tarea.completada === 1) {
+        <p class="acciones"><span style="color: #2e7d32; font-weight: bold;">¡Hecha! ✅</span></p>
+      }
+    }
+  </article>
+</app-tarjeta>

@@ -1,0 +1,124 @@
+.fondo {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  border: none;
+  border-radius: 12px;
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 24px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  z-index: 101;
+  font-family: 'Inter', sans-serif;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  text-align: center;
+  color: #EF4444;
+}
+
+.error {
+  color: #EF4444;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.success {
+  color: #10B981;
+  background: rgba(16, 185, 129, 0.1);
+  padding: 10px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.admin-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.admin-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.admin-list li:last-child {
+  border-bottom: none;
+}
+
+.admin-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.badge.self {
+  font-size: 0.8rem;
+  background: rgba(79, 70, 229, 0.2);
+  color: #A5B4FC;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.btn-eliminar {
+  background: #EF4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.btn-eliminar:hover {
+  background: #DC2626;
+  transform: scale(1.05);
+}
+
+.acciones {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 0;
+}
+
+.btn-cancelar {
+  background: rgba(255,255,255,0.1);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-cancelar:hover {
+  background: rgba(255,255,255,0.2);
+}

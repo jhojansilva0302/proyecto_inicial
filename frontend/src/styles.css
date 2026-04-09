@@ -1,0 +1,68 @@
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    height: 100%;
+}
+
+body {
+    font-family: "Poppins", sans-serif;
+    background-color: #030303;
+    color: #ffffff;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    position: relative;
+    overflow-x: hidden;
+}
+
+app-root, app-home, app-login, app-encabezado {
+    display: block;
+    width: 100%;
+}
+
+/* Capa 1 de fibra óptica (estrellas lentas) */
+body::before {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    background-image: 
+        radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 40px 70px, #e0e0e0, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 90px 140px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(3px 3px at 150px 80px, #a3d9ff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 200px 220px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 280px 60px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 320px 160px, #dddddd, rgba(0,0,0,0));
+    background-repeat: repeat;
+    background-size: 350px 350px;
+    animation: twinkle 4s infinite alternate;
+}
+
+/* Capa 2 de fibra óptica (estrellas rápidas y más tenues) */
+body::after {
+    content: "";
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -1;
+    background-image: 
+        radial-gradient(1px 1px at 10px 10px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 150px 150px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 80px 200px, #dddddd, rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 220px 40px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 380px 210px, #a3d9ff, rgba(0,0,0,0));
+    background-repeat: repeat;
+    background-size: 450px 450px;
+    animation: twinkle 2.5s infinite alternate-reverse;
+}
+
+/* Animación para el titileo de las "fibras ópticas" */
+@keyframes twinkle {
+    0% { opacity: 0.2; }
+    100% { opacity: 1; }
+}

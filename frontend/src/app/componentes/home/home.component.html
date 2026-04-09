@@ -1,0 +1,19 @@
+<main>
+  <ul id="usuarios">
+    @for (usuario of usuarios; track usuario.id) {
+      <li>
+        <app-usuario
+          [seleccionado]="usuario.id === selectionService.idUsuarioSeleccionado()"
+          [usuario]="usuario"
+          (seleccion)="alSeleccionarUsuario($event)"
+        />
+      </li>
+    }
+  </ul>
+
+  @if (selectionService.usuarioSeleccionado()) {
+    <app-tareas [idUsuario]="selectionService.usuarioSeleccionado()!.id" [nombre]="selectionService.usuarioSeleccionado()!.nombre" />
+  } @else {
+    <p id="textoCondicional">Selecciona un usuario de la lista</p>
+  }
+</main>

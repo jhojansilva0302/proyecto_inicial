@@ -1,0 +1,37 @@
+article {
+    padding: 1rem;
+    color: #ffffff;
+    background-color: #1a1a1a;
+}
+
+h2 {
+    margin: 0;
+}
+
+time {
+    color: #aaaaaa;
+}
+
+.acciones {
+    text-align: right;
+    margin: 0;
+}
+
+.acciones button {
+    font: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    background-color: #333333;
+    color: #ffffff;
+    border-radius: 4px;
+    padding: 0.5rem 1.5rem;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.acciones button:hover,
+.acciones button:active {
+    background-color: #4d4d4d;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+}

@@ -1,0 +1,31 @@
+<div class="modal-overlay" (click)="cerrar.emit()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>⚙️ Ajustes del Sistema</h2>
+      <button class="close-btn" (click)="cerrar.emit()">×</button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- Sección Crear Nuevo Admin -->
+      <div class="config-section">
+        <h3>Crear Nuevo Administrador</h3>
+        <form [formGroup]="adminForm" (ngSubmit)="crearAdmin()">
+          <input type="text" formControlName="username" placeholder="Nuevo usuario" autocomplete="off" />
+          <input type="password" formControlName="password" placeholder="Contraseña" />
+          <button type="submit" [disabled]="adminForm.invalid">Crear</button>
+        </form>
+        @if(adminMessage) { <p class="msg">{{ adminMessage }}</p> }
+      </div>
+
+      <!-- Sección Editar Perfil -->
+      <div class="config-section">
+        <h3>Actualizar Mi Contraseña</h3>
+        <form [formGroup]="perfilForm" (ngSubmit)="actualizarPerfil()">
+          <input type="password" formControlName="newPassword" placeholder="Nueva Contraseña" />
+          <button type="submit" [disabled]="perfilForm.invalid" class="btn-profile">Actualizar</button>
+        </form>
+        @if(perfilMessage) { <p class="msg">{{ perfilMessage }}</p> }
+      </div>
+    </div>
+  </div>
+</div>
