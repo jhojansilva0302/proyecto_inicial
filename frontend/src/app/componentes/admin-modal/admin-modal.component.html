@@ -21,6 +21,12 @@
       <div class="config-section">
         <h3>Actualizar Mi Contraseña</h3>
         <form [formGroup]="perfilForm" (ngSubmit)="actualizarPerfil()">
+          <select formControlName="adminId">
+            <option value="" disabled selected>Selecciona un administrador</option>
+            @for (admin of administradores; track admin.id) {
+              <option [value]="admin.id">{{ admin.username }}</option>
+            }
+          </select>
           <input type="password" formControlName="newPassword" placeholder="Nueva Contraseña" />
           <button type="submit" [disabled]="perfilForm.invalid" class="btn-profile">Actualizar</button>
         </form>

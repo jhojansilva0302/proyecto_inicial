@@ -10,6 +10,7 @@
     <div class="auth-controls" style="display: flex; gap: 10px; align-items: center;">
         @if (authService.isLoggedIn()) {
             <span class="admin-badge" style="font-weight: bold; color: white; background: #4F46E5; padding: 5px 10px; border-radius: 8px;">Admin: {{ authService.currentAdmin() }}</span>
+            <button (click)="abrirModalPerfiles()" style="cursor: pointer; padding: 8px 12px; border-radius: 8px; border: none; background: #fff; color: #333; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">👨‍🚀 Perfiles</button>
             <button (click)="abrirModalAdmin()" style="cursor: pointer; padding: 8px 12px; border-radius: 8px; border: none; background: #fff; color: #333; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">⚙️ Ajustes</button>
             <button (click)="abrirModalEliminarAdmin()" style="cursor: pointer; padding: 8px 12px; border-radius: 8px; border: none; background: #FCD34D; color: #92400E; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.2);">🗑️ Eliminar Admin</button>
             <button (click)="authService.logout()" style="cursor: pointer; padding: 8px 12px; border-radius: 8px; border: none; background: #EF4444; color: white;">Cerrar Sesión</button>
@@ -20,6 +21,9 @@
     
     @if (mostrarModal) {
         <app-admin-modal (cerrar)="mostrarModal = false" />
+    }
+    @if (mostrarModalPerfiles) {
+        <app-perfiles-modal (cerrar)="alCerrarModalPerfiles()" />
     }
     @if (mostrarModalEliminar) {
         <app-eliminar-admin (cerrar)="mostrarModalEliminar = false" />

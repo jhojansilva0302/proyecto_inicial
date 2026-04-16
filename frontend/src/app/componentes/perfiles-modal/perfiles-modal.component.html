@@ -1,0 +1,67 @@
+<div class="modal-overlay" (click)="cerrar.emit()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>👨‍🚀 Gestionar Perfiles de Tareas</h2>
+      <button class="close-btn" (click)="cerrar.emit()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <!-- Sección Crear Nuevo Perfil -->
+      <div class="config-section">
+        <h3>Crear Nuevo Perfil</h3>
+        <form [formGroup]="crearForm" (ngSubmit)="crearPerfil()">
+          <input type="text" formControlName="nombre" placeholder="Nombre completo (ej. Elon Musk)" autocomplete="off" />
+          
+          <div class="file-input-wrapper">
+            <label>Foto de Perfil (Opcional):</label>
+            <input type="file" accept="image/*" (change)="onFileSelected($event, false)" />
+            @if(imagenBase64) {
+              <img [src]="imagenBase64" class="preview-img" alt="Preview Perfil" />
+            }
+          </div>
+          <button type="submit" [disabled]="crearForm.invalid">Crear Perfil</button>
+        </form>
+        @if(mensaje) { <p class="msg">{{ mensaje }}</p> }
+      </div>
+
+      <!-- Sección Lista de Perfiles -->
+      <div class="config-section">
+        <h3>Lista de Perfiles</h3>
+        
+        @if(!modoEdicion) {
+          <div class="user-list">
+            @for(usuario of usuariosService.usuarios(); track usuario.id) {
+              <div class="user-item">
+                <img [src]="usuario.avatar || 'assets/default-avatar.png'" class="avatar-img" alt="Avatar" />
+                <span class="user-name">{{ usuario.nombre }}</span>
+                <div class="user-actions">
+                  <button class="btn-edit" (click)="abrirEdicion(usuario)">Editar</button>
+                  <button class="btn-delete" (click)="eliminarPerfil(usuario.id)">Eliminar</button>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <!-- Modo Edición -->
+          <div class="edit-mode-box">
+            <h4>Editando: {{ modoEdicion.nombre }}</h4>
+            <form [formGroup]="editForm" (ngSubmit)="guardarEdicion()">
+              <input type="text" formControlName="nombre" placeholder="Nombre completo" />
+              <div class="file-input-wrapper">
+                <label>Cambiar Foto (Opcional):</label>
+                <input type="file" accept="image/*" (change)="onFileSelected($event, true)" />
+                @if(imagenEditBase64) {
+                  <img [src]="imagenEditBase64" class="preview-img" alt="Preview Editar" />
+                }
+              </div>
+              <div class="edit-actions">
+                <button type="submit" [disabled]="editForm.invalid" class="btn-save">Guardar Cambio</button>
+                <button type="button" class="btn-cancel" (click)="cancelarEdicion()">Cancelar</button>
+              </div>
+            </form>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

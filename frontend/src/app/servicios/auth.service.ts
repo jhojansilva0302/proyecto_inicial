@@ -64,8 +64,8 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/admin`, { username, password });
   }
 
-  actualizarPerfil(password: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/admin/perfil`, { password });
+  actualizarPerfil(id: number, password: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/admin/password/${id}`, { password });
   }
 
   obtenerAdministradores(): Observable<any[]> {

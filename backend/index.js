@@ -23,7 +23,8 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const db = mysql.createPool({
     host: process.env.MYSQLHOST || 'localhost',
@@ -56,7 +57,7 @@ db.getConnection((err, connection) => {
             return;
         }
 
-        // Auto-Seeding
+        // Auto-Seeding Administradores
         db.query('SELECT COUNT(*) AS count FROM administradores', async (err, results) => {
             if (err) {
                 console.error('Error checking administradores:', err);
@@ -73,6 +74,37 @@ db.getConnection((err, connection) => {
                 } catch (error) {
                     console.error('Error hashing password for auto-seeding:', error);
                 }
+            }
+        });
+    });
+
+    // Inicializar tabla de usuarios (perfiles de tareas)
+    const createUsuariosTable = `
+        CREATE TABLE IF NOT EXISTS usuarios (
+            id VARCHAR(50) PRIMARY KEY,
+            nombre VARCHAR(255) NOT NULL,
+            avatar LONGTEXT
+        )
+    `;
+    db.query(createUsuariosTable, (err) => {
+        if (err) return console.error('Error al crear tabla usuarios:', err);
+        
+        db.query('SELECT COUNT(*) AS count FROM usuarios', (err, results) => {
+            if (err) return console.error('Error checking usuarios:', err);
+            if (results[0].count === 0) {
+                console.log('Tabla usuarios vacía, auto-seeding...');
+                const seedData = [
+                    ['u1', 'Elon Musk', 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Elon_Musk_Royal_Society.jpg'],
+                    ['u2', 'Taylor Swift', 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_%283%29.png'],
+                    ['u3', 'Lionel Messi', 'https://upload.wikimedia.org/wikipedia/commons/b/b4/Lionel-Messi-Argentina-2022-FIFA-World-Cup_%28cropped%29.jpg'],
+                    ['u4', 'Albert Einstein', 'https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg'],
+                    ['u5', 'Marie Curie', 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Marie_Curie_c._1920s.jpg']
+                ];
+                seedData.forEach(user => {
+                    db.query('INSERT INTO usuarios (id, nombre, avatar) VALUES (?, ?, ?)', user, (err) => {
+                        if (err) console.error('Error seeding user:', err);
+                    });
+                });
             }
         });
     });
@@ -143,16 +175,17 @@ app.post('/admin', verificarAuth, async (req, res) => {
     }
 });
 
-// Actualizar perfil (contraseña) del logueado
-app.put('/admin/perfil', verificarAuth, async (req, res) => {
+// Actualizar perfil (contraseña) de cualquier administrador
+app.put('/admin/password/:id', verificarAuth, async (req, res) => {
+    const { id } = req.params;
     const { password } = req.body;
     if (!password) return res.status(400).json({ error: 'Falta la nueva contraseña' });
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        db.query('UPDATE administradores SET password = ? WHERE id = ?', [hashedPassword, req.admin.id], (err) => {
+        db.query('UPDATE administradores SET password = ? WHERE id = ?', [hashedPassword, id], (err) => {
             if (err) return res.status(500).json(err);
-            res.json({ mensaje: 'Perfil actualizado correctamente' });
+            res.json({ mensaje: 'Contraseña actualizada correctamente' });
         });
     } catch (e) {
         res.status(500).json({ error: 'Error procesando la solicitud' });
@@ -182,8 +215,46 @@ app.delete('/admin/:id', verificarAuth, (req, res) => {
     });
 });
 
-// --- Rutas Tareas ---
+// --- Rutas Usuarios (Perfiles de Tareas) ---
+app.get('/usuarios', (req, res) => {
+    db.query('SELECT * FROM usuarios', (err, results) => {
+        if (err) return res.status(500).json(err);
+        res.json(results);
+    });
+});
 
+app.post('/usuarios', verificarAuth, (req, res) => {
+    const { nombre, avatar } = req.body;
+    if (!nombre) return res.status(400).json({ error: 'Falta el nombre' });
+    const id = 'u' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    db.query('INSERT INTO usuarios (id, nombre, avatar) VALUES (?, ?, ?)', [id, nombre, avatar || null], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: 'Usuario creado', id });
+    });
+});
+
+app.put('/usuarios/:id', verificarAuth, (req, res) => {
+    const { id } = req.params;
+    const { nombre, avatar } = req.body;
+    if (!nombre) return res.status(400).json({ error: 'Falta el nombre' });
+    db.query('UPDATE usuarios SET nombre = ?, avatar = ? WHERE id = ?', [nombre, avatar || null, id], (err) => {
+        if (err) return res.status(500).json(err);
+        res.json({ mensaje: 'Usuario actualizado' });
+    });
+});
+
+app.delete('/usuarios/:id', verificarAuth, (req, res) => {
+    const { id } = req.params;
+    db.query('DELETE FROM tareas WHERE idUsuario = ?', [id], (err) => {
+        if (err) return res.status(500).json(err);
+        db.query('DELETE FROM usuarios WHERE id = ?', [id], (err) => {
+            if (err) return res.status(500).json(err);
+            res.json({ mensaje: 'Usuario y sus tareas eliminadas' });
+        });
+    });
+});
+
+// --- Rutas Tareas ---
 // GET: Obtener tareas (PÚBLICO)
 app.get('/tareas', (req, res) => {
     const { idUsuario } = req.query; 

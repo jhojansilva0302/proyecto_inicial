@@ -1,0 +1,29 @@
+<div class="modal-overlay" (click)="cerrar.emit()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ modoCreacion ? '📝 Crear Perfil de Tarea' : '⚙️ Editar Perfil' }}</h2>
+      <button class="close-btn" (click)="cerrar.emit()">&times;</button>
+    </div>
+    
+    <div class="modal-body">
+      <form [formGroup]="usuarioForm" (ngSubmit)="guardar()">
+        <label for="nombre">Nombre del Usuario:</label>
+        <input id="nombre" type="text" formControlName="nombre" placeholder="Ej. Elon Musk" autocomplete="off" />
+        
+        <div class="file-input-wrapper">
+          <label>Foto de Perfil (Opcional):</label>
+          <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+          @if(imagenBase64) {
+            <label>Vista Previa:</label>
+            <img [src]="imagenBase64" class="preview-img" alt="Preview Avatar" />
+          }
+        </div>
+        
+        <button type="submit" [disabled]="usuarioForm.invalid || cargando" class="btn-save">
+          {{ modoCreacion ? 'Crear Perfil' : 'Actualizar Perfil' }}
+        </button>
+      </form>
+      @if(mensaje) { <p class="msg">{{ mensaje }}</p> }
+    </div>
+  </div>
+</div>

@@ -19,8 +19,9 @@ button:active,
   color: #ffffff;
 }
 img {
-  width: 2rem;
-  object-fit: contain;
+  width: 2.5rem;
+  height: 2.5rem;
+  object-fit: cover;
   border-radius: 4px;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
 }

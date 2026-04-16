@@ -1,6 +1,6 @@
 <main>
   <ul id="usuarios">
-    @for (usuario of usuarios; track usuario.id) {
+    @for (usuario of usuariosService.usuarios(); track usuario.id) {
       <li>
         <app-usuario
           [seleccionado]="usuario.id === selectionService.idUsuarioSeleccionado()"
@@ -11,8 +11,8 @@
     }
   </ul>
 
-  @if (selectionService.usuarioSeleccionado()) {
-    <app-tareas [idUsuario]="selectionService.usuarioSeleccionado()!.id" [nombre]="selectionService.usuarioSeleccionado()!.nombre" />
+  @if (usuarioSeleccionado) {
+    <app-tareas [idUsuario]="usuarioSeleccionado.id" [nombre]="usuarioSeleccionado.nombre" />
   } @else {
     <p id="textoCondicional">Selecciona un usuario de la lista</p>
   }

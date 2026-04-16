@@ -17,13 +17,27 @@ export class AdminModalComponent {
   adminMessage = '';
   perfilMessage = '';
 
+  administradores: any[] = [];
+
   constructor(private fb: FormBuilder, private authService: AuthService) {
     this.adminForm = this.fb.group({
       username: ['', Validators.required],
       password: ['', Validators.required]
     });
     this.perfilForm = this.fb.group({
+      adminId: ['', Validators.required],
       newPassword: ['', Validators.required]
+    });
+  }
+
+  ngOnInit() {
+    this.cargarAdministradores();
+  }
+
+  cargarAdministradores() {
+    this.authService.obtenerAdministradores().subscribe({
+      next: (data) => this.administradores = data,
+      error: (e) => console.error(e)
     });
   }
 
@@ -34,6 +48,7 @@ export class AdminModalComponent {
         next: () => {
           this.adminMessage = 'Admin creado exitosamente.';
           this.adminForm.reset();
+          this.cargarAdministradores();
         },
         error: (err) => this.adminMessage = err.error?.error || 'Error'
       });
@@ -42,10 +57,10 @@ export class AdminModalComponent {
 
   actualizarPerfil() {
     if (this.perfilForm.valid) {
-      const { newPassword } = this.perfilForm.value;
-      this.authService.actualizarPerfil(newPassword).subscribe({
+      const { adminId, newPassword } = this.perfilForm.value;
+      this.authService.actualizarPerfil(adminId, newPassword).subscribe({
         next: () => {
-          this.perfilMessage = 'Contraseña actualizada. Cierra sesión e ingresa de nuevo para probarla.';
+          this.perfilMessage = 'Contraseña actualizada.';
           this.perfilForm.reset();
         },
         error: (err) => this.perfilMessage = err.error?.error || 'Error'
