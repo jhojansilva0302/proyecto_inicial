@@ -1,22 +1,45 @@
 <app-tarjeta>
-  <article [style.backgroundColor]="tarea.completada === 1 ? '#e8f5e9' : 'transparent'" style="border-radius: 8px; padding: 10px;">
-    <h2>{{ tarea.titulo }}</h2>
-    <time>{{ tarea.expira | date: 'fullDate' }}</time>
-    <p>{{ tarea.resumen }}</p>
-    
-    @if (authService.isLoggedIn()) {
-      <p class="acciones">
-        @if (tarea.completada !== 1) {
-          <button (click)="alCompletarTarea()" style="cursor: pointer;">Terminada</button>
-        } @else {
-          <span style="color: #2e7d32; font-weight: bold; margin-right: 15px;">¡Hecha! ✅</span>
+  @if (!esModoEdicion) {
+    <article [style.backgroundColor]="tarea.completada === 1 ? '#e8f5e9' : 'transparent'" style="border-radius: 8px; padding: 10px;">
+      <h2>{{ tarea.titulo }}</h2>
+      <time>{{ tarea.expira | date: 'fullDate' }}</time>
+      <p>{{ tarea.resumen }}</p>
+      
+      @if (authService.isLoggedIn()) {
+        <p class="acciones">
+          @if (tarea.completada !== 1) {
+            <button (click)="alCompletarTarea()" style="cursor: pointer;">Terminada</button>
+          } @else {
+            <span style="color: #2e7d32; font-weight: bold; margin-right: 15px;">¡Hecha! ✅</span>
+          }
+          <button (click)="alActivarEdicion()" style="cursor: pointer; margin-left: 10px; background-color: #fcd34d; color: #92400e;">Editar</button>
+          <button (click)="alEliminarTarea()" style="cursor: pointer; margin-left: 10px; background-color: #ff4d4d; color: white;">Eliminar</button>
+        </p>
+      } @else {
+        @if (tarea.completada === 1) {
+          <p class="acciones"><span style="color: #2e7d32; font-weight: bold;">¡Hecha! ✅</span></p>
         }
-        <button (click)="alEliminarTarea()" style="cursor: pointer; margin-left: 10px; background-color: #ff4d4d; color: white;">Eliminar</button>
-      </p>
-    } @else {
-      @if (tarea.completada === 1) {
-        <p class="acciones"><span style="color: #2e7d32; font-weight: bold;">¡Hecha! ✅</span></p>
       }
-    }
-  </article>
+    </article>
+  } @else {
+    <article style="border-radius: 8px; padding: 10px; background-color: #f8fafc; border: 1px dashed #cbd5e1;">
+      <h3 style="margin-top: 0;">Editar Tarea</h3>
+      <p style="display: flex; flex-direction: column; gap: 5px;">
+        <label>Título</label>
+        <input type="text" [(ngModel)]="tituloEditado" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;" />
+      </p>
+      <p style="display: flex; flex-direction: column; gap: 5px;">
+        <label>Fecha Límite</label>
+        <input type="date" [(ngModel)]="expiraEditado" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px;" />
+      </p>
+      <p style="display: flex; flex-direction: column; gap: 5px;">
+        <label>Resumen</label>
+        <textarea [(ngModel)]="resumenEditado" rows="3" style="padding: 5px; border: 1px solid #ccc; border-radius: 4px; resize: vertical;"></textarea>
+      </p>
+      <p class="acciones">
+        <button (click)="alCancelarEdicion()" style="cursor: pointer; background: transparent; border: 1px solid #ccc;">Cancelar</button>
+        <button (click)="alGuardarEdicion()" [disabled]="!tituloEditado || !resumenEditado || !expiraEditado" style="cursor: pointer; margin-left: 10px; background-color: #4f46e5; color: white;">Guardar</button>
+      </p>
+    </article>
+  }
 </app-tarjeta>

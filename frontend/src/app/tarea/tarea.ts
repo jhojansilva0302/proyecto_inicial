@@ -4,15 +4,21 @@ import { Tarjeta } from '../componentes/tarjeta/tarjeta';
 import { DatePipe } from '@angular/common';
 import { TareasService } from '../servicios/tareas.service';
 import { AuthService } from '../servicios/auth.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-tarea',
-  imports: [Tarjeta, DatePipe],
+  imports: [Tarjeta, DatePipe, FormsModule],
   templateUrl: './tarea.html',
   styleUrl: './tarea.css',
 })
 export class Tarea {
   @Input({required: true}) tarea!: tarea;
+  
+  esModoEdicion = false;
+  tituloEditado = '';
+  resumenEditado = '';
+  expiraEditado = '';
   
   @Output() completar = new EventEmitter<string>(); 
   @Output() eliminar = new EventEmitter<string>(); 
@@ -37,6 +43,34 @@ export class Tarea {
         this.eliminar.emit(this.tarea.id);
       },
       error: (err) => console.error('Error al eliminar:', err)
+    });
+  }
+
+  alActivarEdicion() {
+    this.esModoEdicion = true;
+    this.tituloEditado = this.tarea.titulo;
+    this.resumenEditado = this.tarea.resumen;
+    this.expiraEditado = this.tarea.expira;
+  }
+
+  alCancelarEdicion() {
+    this.esModoEdicion = false;
+  }
+
+  alGuardarEdicion() {
+    if (!this.tituloEditado || !this.resumenEditado || !this.expiraEditado) return;
+
+    this.tareasService.editarTarea(this.tarea.id, {
+      titulo: this.tituloEditado,
+      resumen: this.resumenEditado,
+      fecha: this.expiraEditado
+    }).subscribe({
+      next: () => {
+        this.esModoEdicion = false;
+        // Emitimos completar para recargar las tareas (el padre llama cargarTareas)
+        this.completar.emit(this.tarea.id);
+      },
+      error: (err) => console.error('Error al editar:', err)
     });
   }
 }

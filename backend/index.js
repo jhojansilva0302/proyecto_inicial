@@ -293,18 +293,30 @@ app.post('/tareas', verificarAuth, (req, res) => {
     });
 });
 
-// PUT: Marcar tarea como completada (PROTEGIDO)
+// PUT: Actualizar o completar tarea (PROTEGIDO)
 app.put('/tareas/:id', verificarAuth, (req, res) => {
     const { id } = req.params;
+    const { titulo, resumen, expira } = req.body;
 
-    const sql = 'UPDATE tareas SET completada = 1 WHERE id = ?';
+    let sql = '';
+    let params = [];
 
-    db.query(sql, [id], (err, result) => {
+    // Si viene titulo, significa que es una edición de contenido
+    if (titulo) {
+        sql = 'UPDATE tareas SET titulo = ?, resumen = ?, expira = ? WHERE id = ?';
+        params = [titulo, resumen, expira, id];
+    } else {
+        // Si no viene titulo, asumimos que solo se quiere marcar como completada
+        sql = 'UPDATE tareas SET completada = 1 WHERE id = ?';
+        params = [id];
+    }
+
+    db.query(sql, params, (err, result) => {
         if (err) {
             console.error('Error UPDATE:', err);
             return res.status(500).json(err);
         }
-        res.json({ mensaje: 'Tarea completada correctamente' });
+        res.json({ mensaje: 'Tarea actualizada correctamente' });
     });
 });
 
