@@ -27,11 +27,11 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const db = mysql.createPool({
-    host: process.env.MYSQLHOST || 'localhost',
-    user: process.env.MYSQLUSER || 'root',
-    password: process.env.MYSQLPASSWORD || '', 
-    database: process.env.MYSQLDATABASE || 'tareas_db',
-    port: process.env.MYSQLPORT || 3306,
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '', 
+    database: process.env.DB_NAME || 'tareas_db',
+    port: process.env.DB_PORT || 3306,
     connectionLimit: 10
 });
 
@@ -296,7 +296,7 @@ app.post('/tareas', verificarAuth, (req, res) => {
 // PUT: Actualizar o completar tarea (PROTEGIDO)
 app.put('/tareas/:id', verificarAuth, (req, res) => {
     const { id } = req.params;
-    const { titulo, resumen, expira } = req.body;
+    const { titulo, resumen, expira, completada } = req.body;
 
     let sql = '';
     let params = [];
@@ -305,8 +305,12 @@ app.put('/tareas/:id', verificarAuth, (req, res) => {
     if (titulo) {
         sql = 'UPDATE tareas SET titulo = ?, resumen = ?, expira = ? WHERE id = ?';
         params = [titulo, resumen, expira, id];
+    } else if (completada !== undefined) {
+        // Si viene completada, actualizamos el estado
+        sql = 'UPDATE tareas SET completada = ? WHERE id = ?';
+        params = [completada, id];
     } else {
-        // Si no viene titulo, asumimos que solo se quiere marcar como completada
+        // Si no viene titulo ni completada, asumimos que solo se quiere marcar como completada
         sql = 'UPDATE tareas SET completada = 1 WHERE id = ?';
         params = [id];
     }

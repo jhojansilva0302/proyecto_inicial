@@ -1,0 +1,38 @@
+services:
+  # Servicio Backend (Node.js)
+  - type: web
+    name: proyecto-inicial-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: FRONTEND_URL
+        value: https://proyecto-inicial-frontend.onrender.com
+      - key: DB_HOST
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: DB_PORT
+        value: 3306
+      - key: JWT_SECRET
+        generateValue: true
+
+  # Servicio Frontend (Angular)
+  - type: static
+    name: proyecto-inicial-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build:prod
+    publishPath: dist/proyecto_inicial/browser
+    # Regla de enrutamiento necesaria para Single Page Applications (SPA) como Angular
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

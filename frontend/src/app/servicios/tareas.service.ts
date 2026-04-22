@@ -40,6 +40,10 @@ export class TareasService {
     return this.http.put(`${this.apiUrl}/${id}`, {});
   }
 
+  habilitarTarea(id: string) {
+    return this.http.put(`${this.apiUrl}/${id}`, { completada: 0 });
+  }
+
   // 5. PUT: Editar tarea
   editarTarea(id: string, infoDeTarea: { titulo: string; resumen: string; fecha: string }) {
     const tareaEditada = {

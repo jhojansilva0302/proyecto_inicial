@@ -36,6 +36,16 @@ export class Tarea {
     });
   }
 
+  alHabilitarTarea() {
+    this.tareasService.habilitarTarea(this.tarea.id).subscribe({
+      next: () => {
+        console.log('¡Tarea habilitada en MySQL!');
+        this.completar.emit(this.tarea.id); // Se emite el mismo evento para recargar
+      },
+      error: (err) => console.error('Error al habilitar:', err)
+    });
+  }
+
   alEliminarTarea() {
     this.tareasService.eliminarTarea(this.tarea.id).subscribe({
       next: () => {
