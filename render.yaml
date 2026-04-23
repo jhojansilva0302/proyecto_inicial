@@ -3,6 +3,7 @@ services:
   - type: web
     name: proyecto-inicial-backend
     env: node
+    plan: free
     rootDir: backend
     buildCommand: npm install
     startCommand: node index.js
