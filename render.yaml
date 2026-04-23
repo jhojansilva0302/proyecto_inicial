@@ -28,15 +28,4 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
-  # Servicio Frontend (Angular - Static Site)
-  - type: static
-    name: proyecto-inicial-frontend
-    env: static
-    rootDir: frontend
-    buildCommand: npm install && npm run build:prod
-    publishPath: dist/proyecto_inicial/browser
-    # Regla de enrutamiento necesaria para Single Page Applications (SPA) como Angular
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+
