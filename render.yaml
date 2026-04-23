@@ -11,7 +11,7 @@ services:
       - key: PORT
         value: "3000"
       - key: FRONTEND_URL
-        value: "https://proyecto-inicial-frontend.onrender.com"
+        value: "https://proyecto-inicial-alpha.vercel.app"
       # --- TiDB Cloud: Rellenar con las credenciales de tu clúster ---
       - key: DB_HOST
         sync: false
