@@ -10,12 +10,19 @@ const app = express();
 const SECRET_KEY = process.env.JWT_SECRET || 'super_secret_key_123';
 
 // CORS configuration (allow localhost:4200 and production URL)
-const allowedOrigins = ['http://localhost:4200', process.env.FRONTEND_URL];
 app.use(cors({
     origin: function(origin, callback){
         if(!origin) return callback(null, true);
-        if(allowedOrigins.indexOf(origin) === -1){
-            return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
+        
+        let frontendUrl = (process.env.FRONTEND_URL || '').trim();
+        if (frontendUrl.endsWith('/')) frontendUrl = frontendUrl.slice(0, -1);
+        
+        const allowedOrigins = ['http://localhost:4200', frontendUrl];
+        let cleanOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+
+        if(allowedOrigins.indexOf(cleanOrigin) === -1){
+            console.error('CORS Bloqueado. Origin:', origin, 'Esperado:', frontendUrl);
+            return callback(new Error('Bloqueado por CORS'), false);
         }
         return callback(null, true);
     },
