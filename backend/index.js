@@ -17,7 +17,7 @@ app.use(cors({
         let frontendUrl = (process.env.FRONTEND_URL || '').trim();
         if (frontendUrl.endsWith('/')) frontendUrl = frontendUrl.slice(0, -1);
         
-        const allowedOrigins = ['http://localhost:4200', frontendUrl];
+        const allowedOrigins = ['http://localhost:4200', 'https://proyecto-inicial-alpha.vercel.app', frontendUrl];
         let cleanOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
 
         if(allowedOrigins.indexOf(cleanOrigin) === -1){
