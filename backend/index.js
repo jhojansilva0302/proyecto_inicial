@@ -26,87 +26,141 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
+// Configuración SSL para TiDB Cloud (requiere TLS en conexiones públicas)
+const sslConfig = process.env.DB_SSL === 'true' ? {
+    ssl: {
+        rejectUnauthorized: true,
+        minVersion: 'TLSv1.2'
+    }
+} : {};
+
 const db = mysql.createPool({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '', 
+    password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'tareas_db',
-    port: process.env.DB_PORT || 3306,
-    connectionLimit: 10
+    port: parseInt(process.env.DB_PORT) || 3306,
+    connectionLimit: 10,
+    waitForConnections: true,
+    queueLimit: 0,
+    ...sslConfig
 });
 
+// =============================================
+// AUTO-HEALING: Creación automática de tablas
+// =============================================
+async function inicializarBaseDeDatos() {
+    console.log('[Auto-Healing] Iniciando verificación de tablas...');
+
+    // --- Tabla: administradores ---
+    await new Promise((resolve, reject) => {
+        const sql = `
+            CREATE TABLE IF NOT EXISTS administradores (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(255) UNIQUE NOT NULL,
+                password VARCHAR(255) NOT NULL
+            )
+        `;
+        db.query(sql, async (err) => {
+            if (err) { console.error('[Auto-Healing] Error al crear tabla administradores:', err); return reject(err); }
+            console.log('[Auto-Healing] Tabla "administradores" verificada ✓');
+
+            // Seed: crear admin por defecto si la tabla está vacía
+            db.query('SELECT COUNT(*) AS count FROM administradores', async (err, results) => {
+                if (err) return reject(err);
+                if (results[0].count === 0) {
+                    console.log('[Auto-Healing] Sin administradores, creando usuario "admin" por defecto...');
+                    try {
+                        const hashedPassword = await bcrypt.hash('admin123', 10);
+                        db.query('INSERT INTO administradores (username, password) VALUES (?, ?)', ['admin', hashedPassword], (err) => {
+                            if (err) console.error('[Auto-Healing] Error creando admin:', err);
+                            else console.log('[Auto-Healing] Usuario "admin" creado con contraseña "admin123" ✓');
+                            resolve();
+                        });
+                    } catch (e) { reject(e); }
+                } else {
+                    resolve();
+                }
+            });
+        });
+    });
+
+    // --- Tabla: usuarios ---
+    await new Promise((resolve, reject) => {
+        const sql = `
+            CREATE TABLE IF NOT EXISTS usuarios (
+                id VARCHAR(50) PRIMARY KEY,
+                nombre VARCHAR(255) NOT NULL,
+                avatar LONGTEXT
+            )
+        `;
+        db.query(sql, (err) => {
+            if (err) { console.error('[Auto-Healing] Error al crear tabla usuarios:', err); return reject(err); }
+            console.log('[Auto-Healing] Tabla "usuarios" verificada ✓');
+
+            // Seed: insertar perfiles de ejemplo si la tabla está vacía
+            db.query('SELECT COUNT(*) AS count FROM usuarios', (err, results) => {
+                if (err) return reject(err);
+                if (results[0].count === 0) {
+                    console.log('[Auto-Healing] Sin usuarios, cargando datos de ejemplo...');
+                    const seedData = [
+                        ['u1', 'Elon Musk', 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Elon_Musk_Royal_Society.jpg'],
+                        ['u2', 'Taylor Swift', 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_%283%29.png'],
+                        ['u3', 'Lionel Messi', 'https://upload.wikimedia.org/wikipedia/commons/b/b4/Lionel-Messi-Argentina-2022-FIFA-World-Cup_%28cropped%29.jpg'],
+                        ['u4', 'Albert Einstein', 'https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg'],
+                        ['u5', 'Marie Curie', 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Marie_Curie_c._1920s.jpg']
+                    ];
+                    let pending = seedData.length;
+                    seedData.forEach(user => {
+                        db.query('INSERT IGNORE INTO usuarios (id, nombre, avatar) VALUES (?, ?, ?)', user, (err) => {
+                            if (err) console.error('[Auto-Healing] Error en seed usuario:', err);
+                            if (--pending === 0) {
+                                console.log('[Auto-Healing] Usuarios de ejemplo cargados ✓');
+                                resolve();
+                            }
+                        });
+                    });
+                } else {
+                    resolve();
+                }
+            });
+        });
+    });
+
+    // --- Tabla: tareas ---
+    await new Promise((resolve, reject) => {
+        const sql = `
+            CREATE TABLE IF NOT EXISTS tareas (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                titulo VARCHAR(255) NOT NULL,
+                resumen TEXT,
+                expira DATE,
+                idUsuario VARCHAR(50),
+                completada TINYINT(1) DEFAULT 0,
+                FOREIGN KEY (idUsuario) REFERENCES usuarios(id) ON DELETE CASCADE
+            )
+        `;
+        db.query(sql, (err) => {
+            if (err) { console.error('[Auto-Healing] Error al crear tabla tareas:', err); return reject(err); }
+            console.log('[Auto-Healing] Tabla "tareas" verificada ✓');
+            resolve();
+        });
+    });
+
+    console.log('[Auto-Healing] ✅ Todas las tablas verificadas y listas.');
+}
+
+// Conectar a la BD y lanzar el auto-healing
 db.getConnection((err, connection) => {
     if (err) {
         console.error('Error al conectar a la base de datos:', err);
         return;
     }
-    console.log('Conexión exitosa a la base de datos');
+    console.log('Conexión exitosa a la base de datos ✓');
     connection.release();
 
-    // Inicializar tabla de administradores si no existe
-    const createTableQuery = `
-        CREATE TABLE IF NOT EXISTS administradores (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            username VARCHAR(255) UNIQUE NOT NULL,
-            password VARCHAR(255) NOT NULL
-        )
-    `;
-    db.query(createTableQuery, (err) => {
-        if (err) {
-            console.error('Error al crear tabla administradores:', err);
-            return;
-        }
-
-        // Auto-Seeding Administradores
-        db.query('SELECT COUNT(*) AS count FROM administradores', async (err, results) => {
-            if (err) {
-                console.error('Error checking administradores:', err);
-                return;
-            }
-            if (results[0].count === 0) {
-                console.log('La tabla de administradores está vacía, creando usuario por defecto "admin"...');
-                try {
-                    const hashedPassword = await bcrypt.hash('admin123', 10);
-                    db.query('INSERT INTO administradores (username, password) VALUES (?, ?)', ['admin', hashedPassword], (err) => {
-                        if (err) console.error('Error auto-seeding admin:', err);
-                        else console.log('Usuario administrador "admin" creado con éxito.');
-                    });
-                } catch (error) {
-                    console.error('Error hashing password for auto-seeding:', error);
-                }
-            }
-        });
-    });
-
-    // Inicializar tabla de usuarios (perfiles de tareas)
-    const createUsuariosTable = `
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id VARCHAR(50) PRIMARY KEY,
-            nombre VARCHAR(255) NOT NULL,
-            avatar LONGTEXT
-        )
-    `;
-    db.query(createUsuariosTable, (err) => {
-        if (err) return console.error('Error al crear tabla usuarios:', err);
-        
-        db.query('SELECT COUNT(*) AS count FROM usuarios', (err, results) => {
-            if (err) return console.error('Error checking usuarios:', err);
-            if (results[0].count === 0) {
-                console.log('Tabla usuarios vacía, auto-seeding...');
-                const seedData = [
-                    ['u1', 'Elon Musk', 'https://upload.wikimedia.org/wikipedia/commons/e/ed/Elon_Musk_Royal_Society.jpg'],
-                    ['u2', 'Taylor Swift', 'https://upload.wikimedia.org/wikipedia/commons/b/b1/Taylor_Swift_at_the_2023_MTV_Video_Music_Awards_%283%29.png'],
-                    ['u3', 'Lionel Messi', 'https://upload.wikimedia.org/wikipedia/commons/b/b4/Lionel-Messi-Argentina-2022-FIFA-World-Cup_%28cropped%29.jpg'],
-                    ['u4', 'Albert Einstein', 'https://upload.wikimedia.org/wikipedia/commons/d/d3/Albert_Einstein_Head.jpg'],
-                    ['u5', 'Marie Curie', 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Marie_Curie_c._1920s.jpg']
-                ];
-                seedData.forEach(user => {
-                    db.query('INSERT INTO usuarios (id, nombre, avatar) VALUES (?, ?, ?)', user, (err) => {
-                        if (err) console.error('Error seeding user:', err);
-                    });
-                });
-            }
-        });
+    inicializarBaseDeDatos().catch(e => {
+        console.error('[Auto-Healing] Error crítico en la inicialización:', e);
     });
 });
 

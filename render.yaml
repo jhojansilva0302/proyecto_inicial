@@ -11,6 +11,7 @@ services:
         value: 3000
       - key: FRONTEND_URL
         value: https://proyecto-inicial-frontend.onrender.com
+      # --- TiDB Cloud: Rellenar con las credenciales de tu clúster ---
       - key: DB_HOST
         sync: false
       - key: DB_USER
@@ -20,11 +21,14 @@ services:
       - key: DB_NAME
         sync: false
       - key: DB_PORT
-        value: 3306
+        value: 4000
+      # SSL requerido por TiDB Cloud para conexiones públicas
+      - key: DB_SSL
+        value: true
       - key: JWT_SECRET
         generateValue: true
 
-  # Servicio Frontend (Angular)
+  # Servicio Frontend (Angular - Static Site)
   - type: static
     name: proyecto-inicial-frontend
     env: static
