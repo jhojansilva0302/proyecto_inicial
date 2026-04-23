@@ -184,6 +184,11 @@ function verificarAuth(req, res, next) {
     });
 }
 
+// --- Rutas Raíz ---
+app.get('/', (req, res) => {
+    res.send('<h1>API del Gestor de Tareas Funciona Correctamente</h1><p>Esta es la API del backend. El frontend se ejecuta por separado.</p>');
+});
+
 // --- Rutas Auth y Admin ---
 
 // Login
